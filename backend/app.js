@@ -4,6 +4,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const fs = require('fs');
 const path = require('path');
+const nodemailer = require('nodemailer');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 const experienciaRoutes = require('./routes/experienciaRoutes');
@@ -33,6 +34,40 @@ app.get('/api/cv', (req, res) => {
     res.json(data);
   } catch (error) {
     res.status(500).json({ message: 'Error al leer CV', error: error.message });
+  }
+});
+
+const mailTransporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST,
+  port: Number(process.env.EMAIL_PORT) || 587,
+  secure: process.env.EMAIL_SECURE === 'true',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+app.post('/api/contacto', async (req, res) => {
+  const { nombre, correo, mensaje } = req.body;
+
+  if (!nombre || !correo || !mensaje) {
+    return res.status(400).json({ message: 'Todos los campos son obligatorios' });
+  }
+
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_FROM || process.env.EMAIL_USER || 'no-reply@example.com',
+      to: process.env.EMAIL_TO || 'galindocontrerasalexander@gmail.com',
+      subject: `Nuevo mensaje desde CV - ${nombre}`,
+      text: `Nombre: ${nombre}\nCorreo: ${correo}\n\nMensaje:\n${mensaje}`,
+      html: `<p><strong>Nombre:</strong> ${nombre}</p><p><strong>Correo:</strong> ${correo}</p><p><strong>Mensaje:</strong></p><p>${mensaje.replace(/\n/g, '<br>')}</p>`
+    };
+
+    await mailTransporter.sendMail(mailOptions);
+    res.json({ message: 'Correo enviado correctamente' });
+  } catch (error) {
+    console.error('Error enviando correo:', error.message);
+    res.status(500).json({ message: 'Error al enviar el correo', error: error.message });
   }
 });
 
@@ -236,21 +271,40 @@ app.get('/', (req, res) => {
     (function(){
       const contactForm = document.getElementById('contactForm');
       if (contactForm) {
-        contactForm.addEventListener('submit', function(event) {
+        contactForm.addEventListener('submit', async function(event) {
           event.preventDefault();
           const name = document.getElementById('contactName').value.trim();
           const email = document.getElementById('contactEmail').value.trim();
           const message = document.getElementById('contactMessage').value.trim();
           const result = document.getElementById('contactResult');
 
+          result.textContent = '';
+
           if (!name || !email || !message) {
             result.textContent = 'Por favor completa todos los campos.';
             return;
           }
 
-          const subject = encodeURIComponent('Contacto desde CV - ' + name);
-          const body = encodeURIComponent('Nombre: ' + name + '\nCorreo: ' + email + '\n\n' + message);
-          window.location.href = 'mailto:galindocontrerasalexander@gmail.com?subject=' + subject + '&body=' + body;
+          try {
+            const response = await fetch('/api/contacto', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ nombre: name, correo: email, mensaje: message })
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+              result.textContent = 'Mensaje enviado. Revisa tu bandeja de entrada pronto.';
+              document.getElementById('contactForm').reset();
+            } else {
+              result.textContent = data.message || 'No se pudo enviar el mensaje. Intenta de nuevo.';
+            }
+          } catch (error) {
+            console.error('Error enviando mensaje:', error);
+            result.textContent = 'Error de conexión. Intenta de nuevo más tarde.';
+          }
         });
       }
 
