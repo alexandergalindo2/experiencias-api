@@ -1,0 +1,28 @@
+{
+  "persona": {
+    "nombre": "Alexander Galindo Contreras",
+    "titulo": "Estudiante de Tecnología / Desarrollador Web",
+    "resumen": "Hola, soy estudiante de tecnología y desarrollador web. Me especializo en crear interfaces de usuario interactivas y en conectar aplicaciones frontend con sistemas backend para la gestión de datos.",
+    "email": "galindocontrerasalexander@gmail.com",
+    "telefono": "3113602478",
+    "ubicacion": "Sincelejito, Bolivar",
+    "foto": "POR_PEGAR_URL_O_SUBIR_POR_WHATSAPP"
+  },
+  "experiencias": [],
+  "educacion": [
+    {
+      "institucion": "En curso",
+      "titulo": "Ingeniería de Software",
+      "fechaInicio": "",
+      "fechaFin": "",
+      "descripcion": "Estudiante de Ingeniería de Software."
+    }
+  ],
+  "habilidades": [],
+  "proyectos": [],
+  "certificaciones": [],
+  "idiomas": [
+    { "idioma": "Español", "nivel": "Nativo" }
+  ],
+  "enlaces": {}
+}
