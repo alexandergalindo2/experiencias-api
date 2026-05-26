@@ -73,6 +73,21 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (req, res) => {
+  let photoUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&h=256&fit=crop';
+  try {
+    const file = path.join(__dirname, 'data', 'cv.json');
+    if (fs.existsSync(file)) {
+      const raw = fs.readFileSync(file, 'utf8');
+      const cv = JSON.parse(raw);
+      const customPhoto = cv.persona?.foto;
+      if (customPhoto && customPhoto !== 'POR_PEGAR_URL_O_SUBIR_POR_WHATSAPP') {
+        photoUrl = customPhoto;
+      }
+    }
+  } catch (error) {
+    console.error('Error leyendo la foto del CV:', error.message);
+  }
+
   res.send(`<!doctype html>
 <html lang="es">
 <head>
@@ -103,6 +118,13 @@ app.get('/', (req, res) => {
     .skill{background:rgba(255,255,255,0.03);padding:8px 12px;border-radius:999px;color:var(--muted);font-size:13px}
     .contact{display:flex;flex-direction:column;gap:6px;margin-top:10px}
     .contact a{color:#cfeefe;text-decoration:none;font-weight:600}
+    .contact-form{display:grid;gap:12px}
+    .contact-input,.contact-textarea{width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#f8fbff;padding:12px;font-size:14px}
+    .contact-input:focus,.contact-textarea:focus{outline:none;border-color:rgba(46,160,255,0.7);box-shadow:0 0 0 3px rgba(46,160,255,0.12)}
+    .contact-textarea{min-height:130px;resize:vertical}
+    .contact-button{margin-top:10px;background:var(--accent);color:#08101f;border:none;padding:12px 18px;border-radius:12px;font-weight:700;cursor:pointer;transition:.2s}
+    .contact-button:hover{opacity:.95}
+    .form-message{margin-top:10px;color:#a9e2ff;font-size:14px}
     .meta-block{color:var(--muted);font-size:13px}
     .aside-card{padding:14px;border-radius:12px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.02)}
     @media (max-width:920px){.grid{grid-template-columns:1fr;}.avatar{width:86px;height:86px}}
@@ -114,7 +136,7 @@ app.get('/', (req, res) => {
     <div class="card">
       <header>
         <div class="avatar">
-          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&h=256&fit=crop" alt="Alexander Galindo">
+          <img src="${photoUrl}" alt="Alexander Galindo">
         </div>
         <div style="flex:1">
           <h1>Alexander Galindo</h1>
@@ -131,7 +153,7 @@ app.get('/', (req, res) => {
         <main>
           <section class="section profile" id="perfil">
             <h2>Perfil</h2>
-            <p>Estudiante de tecnología con enfoque en desarrollo web. Experiencia práctica construyendo interfaces y APIs usando tecnologías modernas. Me especializo en resolver problemas, aprender herramientas nuevas rápidamente y entregar soluciones limpias y mantenibles.</p>
+            <p>Soy técnico en sistemas y actualmente estudio Ingeniería de Software en la Universidad de Cartagena - UDEC. Me enfoco en desarrollo web, construcción de APIs y aplicaciones con buenas prácticas.</p>
           </section>
 
           <section class="section experience" id="experiencia">
@@ -153,8 +175,26 @@ app.get('/', (req, res) => {
           <section class="section education" id="educacion">
             <h2>Educación</h2>
             <div class="item">
-              <strong>Ingeniería de Software — En curso (Estudiante de Ingeniería de Software)</strong>
-              <div class="meta">Universidad / Institución</div>
+              <strong>Técnico en Sistemas</strong>
+              <div class="meta">Formación técnica en sistemas</div>
+            </div>
+            <div class="item">
+              <strong>Ingeniería de Software — En curso</strong>
+              <div class="meta">Universidad de Cartagena - UDEC</div>
+            </div>
+          </section>
+
+          <section class="section contact-section" id="contacto">
+            <h2>¡Escríbeme! 📬</h2>
+            <p style="color:var(--muted);line-height:1.6">Deja tu nombre, correo y mensaje. Al enviar, se abrirá tu correo para escribirme directamente.</p>
+            <div class="item">
+              <form id="contactForm" class="contact-form">
+                <input id="contactName" type="text" placeholder="Nombre" required class="contact-input" />
+                <input id="contactEmail" type="email" placeholder="Correo Electrónico" required class="contact-input" />
+                <textarea id="contactMessage" rows="5" placeholder="Mensaje" required class="contact-textarea"></textarea>
+                <button type="submit" class="contact-button">Enviar Mensaje</button>
+                <div id="contactResult" class="form-message"></div>
+              </form>
             </div>
           </section>
 
@@ -194,6 +234,26 @@ app.get('/', (req, res) => {
 
   <script>
     (function(){
+      const contactForm = document.getElementById('contactForm');
+      if (contactForm) {
+        contactForm.addEventListener('submit', function(event) {
+          event.preventDefault();
+          const name = document.getElementById('contactName').value.trim();
+          const email = document.getElementById('contactEmail').value.trim();
+          const message = document.getElementById('contactMessage').value.trim();
+          const result = document.getElementById('contactResult');
+
+          if (!name || !email || !message) {
+            result.textContent = 'Por favor completa todos los campos.';
+            return;
+          }
+
+          const subject = encodeURIComponent('Contacto desde CV - ' + name);
+          const body = encodeURIComponent('Nombre: ' + name + '\nCorreo: ' + email + '\n\n' + message);
+          window.location.href = 'mailto:galindocontrerasalexander@gmail.com?subject=' + subject + '&body=' + body;
+        });
+      }
+
       window.copyToClipboard = function(text){
         try {
           navigator.clipboard.writeText(text);
