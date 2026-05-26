@@ -19,8 +19,6 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
-
-// No usamos carpeta pública: la ruta raíz devolverá el HTML completo embebido
 app.use('/api/experiencias', experienciaRoutes);
 
 // Endpoint para servir datos del CV desde data/cv.json
