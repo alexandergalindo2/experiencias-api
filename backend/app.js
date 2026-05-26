@@ -19,6 +19,8 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+
+// No usamos carpeta pública: la ruta raíz devolverá el HTML completo embebido
 app.use('/api/experiencias', experienciaRoutes);
 
 // Endpoint para servir datos del CV desde data/cv.json
@@ -146,7 +148,117 @@ const swaggerSpec = swaggerJsdoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (req, res) => {
-  res.send('API de experiencias profesionales funcionando');
+  res.send(`<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Hoja de Vida - Alexander Galindo</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#6ee7b7;--muted:#9aa4b2;--glass: rgba(255,255,255,0.04);--shadow: 0 8px 30px rgba(2,6,23,0.7);font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
+    *{box-sizing:border-box}
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#071021 0%, #0f1724 100%);color:#e6eef6}
+    .container{max-width:1100px;margin:40px auto;padding:28px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:16px;padding:28px;box-shadow:var(--shadow);border:1px solid rgba(255,255,255,0.03)}
+    header{display:flex;align-items:center;gap:20px}
+    .avatar{width:110px;height:110px;border-radius:16px;background:linear-gradient(135deg,var(--accent),#60a5fa);flex:0 0 110px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#07203a;font-size:28px}
+    h1{margin:0;font-size:28px}
+    .meta{color:var(--muted);margin-top:6px}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:24px;margin-top:22px}
+    .section{margin-bottom:20px}
+    .section h2{margin:0 0 12px 0;font-size:16px;color:var(--accent)}
+    .profile p{color:var(--muted);line-height:1.5}
+    .experience .item{background:var(--glass);padding:14px;border-radius:10px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.02)}
+    .item h3{margin:0;font-size:15px}
+    .item .meta{font-size:13px}
+    .education .item{padding:12px;border-radius:8px;background:transparent;border-left:3px solid rgba(255,255,255,0.03);margin-bottom:10px}
+    .skills{display:flex;flex-wrap:wrap;gap:8px}
+    .skill{background:rgba(255,255,255,0.03);padding:8px 10px;border-radius:999px;color:var(--muted);font-size:13px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr;}.avatar{width:86px;height:86px}}
+    .contact{display:flex;gap:12px;flex-wrap:wrap}
+    .btn{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px 12px;border-radius:8px;color:var(--muted);font-size:13px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <header>
+        <div class="avatar">AG</div>
+        <div>
+          <h1>Alexander Galindo</h1>
+          <div class="meta">Desarrollador Fullstack · Arquitecto de Software · Open to remote</div>
+          <div class="contact" style="margin-top:10px">
+            <div class="btn">alexander@example.com</div>
+            <div class="btn">Bogotá, Colombia</div>
+          </div>
+        </div>
+      </header>
+
+      <div class="grid">
+        <main>
+          <section class="section profile" id="perfil">
+            <h2>Perfil</h2>
+            <p>Ingeniero de software con más de 5 años diseñando y desarrollando aplicaciones web escalables. Experiencia en Node.js, Express, React y arquitecturas basadas en microservicios. Apasionado por la calidad de código, buenas prácticas y crear experiencias de usuario confiables.</p>
+          </section>
+
+          <section class="section experience" id="experiencia">
+            <h2>Experiencia Laboral</h2>
+            <div class="item">
+              <h3>Desarrollador Fullstack — Tech Solutions S.A.</h3>
+              <div class="meta">Ene 2022 — Mar 2024 · Bogotá, Colombia</div>
+              <p style="color:var(--muted);margin-top:8px">Lideré el desarrollo de la plataforma principal usando React, Node.js y MongoDB. Implementé APIs REST, pruebas automáticas y despliegues continuos que mejoraron la confiabilidad en producción.</p>
+            </div>
+
+            <div class="item">
+              <h3>Ingeniero de Software — Innovate Corp</h3>
+              <div class="meta">Jun 2020 — Dic 2021 · Remoto</div>
+              <p style="color:var(--muted);margin-top:8px">Diseño y construcción de microservicios, integración con terceros y optimización de rendimiento en servicios backend.</p>
+            </div>
+          </section>
+
+          <section class="section education" id="educacion">
+            <h2>Educación</h2>
+            <div class="item">
+              <strong>Ingeniería de Sistemas</strong>
+              <div class="meta">Universidad Nacional · 2015 — 2020</div>
+            </div>
+            <div class="item">
+              <strong>Cursos:</strong>
+              <div class="meta">Arquitectura de software, DevOps básico, Diseño de APIs</div>
+            </div>
+          </section>
+
+          <section class="section skills" id="habilidades">
+            <h2>Habilidades</h2>
+            <div class="skills">
+              <div class="skill">Node.js</div>
+              <div class="skill">Express</div>
+              <div class="skill">React</div>
+              <div class="skill">MongoDB</div>
+              <div class="skill">TypeScript</div>
+              <div class="skill">Docker</div>
+              <div class="skill">Testing</div>
+              <div class="skill">CI/CD</div>
+            </div>
+          </section>
+        </main>
+
+        <aside>
+          <section class="section" style="padding:12px;background:rgba(255,255,255,0.02);border-radius:12px">
+            <h2>Contacto</h2>
+            <div style="color:var(--muted);margin-top:8px">alexander@example.com<br>https://linkedin.com/in/alexandergalindo</div>
+          </section>
+
+          <section class="section" style="margin-top:14px;padding:12px;background:rgba(255,255,255,0.02);border-radius:12px">
+            <h2>Resumen</h2>
+            <div style="color:var(--muted);margin-top:8px">Ingeniero con foco en soluciones backend, liderazgo técnico y entrega de proyectos a producción con calidad.</div>
+          </section>
+        </aside>
+      </div>
+    </div>
+  </div>
+</body>
+</html>`);
 });
 
 app.listen(PORT, () => {
