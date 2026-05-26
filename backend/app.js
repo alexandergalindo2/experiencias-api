@@ -15,6 +15,15 @@ const app = express();
 const PORT = process.env.PORT || 4000;
 const MONGO_URI = process.env.MONGO_URI;
 
+const escapeHtml = (value) => {
+  return String(value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+};
+
 app.use(cors({
   origin: 'https://frontend-28grog45p-alexandergalindo2s-projects.vercel.app',
   credentials: true
@@ -110,26 +119,35 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 app.get('/', (req, res) => {
   let photoUrl = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=256&h=256&fit=crop';
+  let persona = {};
   try {
     const file = path.join(__dirname, 'data', 'cv.json');
     if (fs.existsSync(file)) {
       const raw = fs.readFileSync(file, 'utf8');
       const cv = JSON.parse(raw);
-      const customPhoto = cv.persona?.foto;
+      persona = cv.persona || {};
+      const customPhoto = persona.foto;
       if (customPhoto && customPhoto !== 'POR_PEGAR_URL_O_SUBIR_POR_WHATSAPP') {
         photoUrl = customPhoto;
       }
     }
   } catch (error) {
-    console.error('Error leyendo la foto del CV:', error.message);
+    console.error('Error leyendo el CV:', error.message);
   }
+
+  const displayName = escapeHtml(persona.nombre || 'Alexander Galindo');
+  const displayTitle = escapeHtml(persona.titulo || 'Estudiante de Tecnología / Desarrollador Web');
+  const displaySummary = escapeHtml(persona.resumen || 'Soy técnico en sistemas y actualmente estudio Ingeniería de Software en la Universidad de Cartagena - UDEC. Me enfoco en desarrollo web, construcción de APIs y aplicaciones con buenas prácticas.');
+  const displayEmail = escapeHtml(persona.email || 'galindocontrerasalexander@gmail.com');
+  const displayPhone = escapeHtml(persona.telefono || '3113602478');
+  const displayLocation = escapeHtml(persona.ubicacion || 'Sincelejito, Bolívar');
 
   res.send(`<!doctype html>
 <html lang="es">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>Hoja de Vida - Alexander Galindo</title>
+  <title>Hoja de Vida - ${displayName}</title>
   <style>
     :root{--bg:#0f1724;--card:#0b1220;--accent:#2ea0ff;--accent-gradient: linear-gradient(135deg,#6ee7b7,#60a5fa);--muted:#9aa4b2;--glass: rgba(255,255,255,0.03);--shadow: 0 12px 40px rgba(2,6,23,0.7);--radius: 14px;font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;}
     *{box-sizing:border-box}
@@ -172,15 +190,15 @@ app.get('/', (req, res) => {
     <div class="card">
       <header>
         <div class="avatar">
-          <img src="${photoUrl}" alt="Alexander Galindo">
+          <img src="${photoUrl}" alt="${displayName}">
         </div>
         <div style="flex:1">
-          <h1>Alexander Galindo</h1>
-          <div class="title">Estudiante de Tecnología / Desarrollador Web</div>
+          <h1>${displayName}</h1>
+          <div class="title">${displayTitle}</div>
           <div class="contact" style="margin-top:10px">
-            <a href="mailto:galindocontrerasalexander@gmail.com">galindocontrerasalexander@gmail.com</a>
-            <div class="phone">Tel: 3113602478</div>
-            <div class="meta-block">Ubicación: Sincelejito, Bolívar</div>
+            <a href="mailto:${displayEmail}">${displayEmail}</a>
+            <div class="phone">Tel: ${displayPhone}</div>
+            <div class="meta-block">Ubicación: ${displayLocation}</div>
           </div>
         </div>
       </header>
@@ -189,7 +207,7 @@ app.get('/', (req, res) => {
         <main>
           <section class="section profile" id="perfil">
             <h2>Perfil</h2>
-            <p>Soy técnico en sistemas y actualmente estudio Ingeniería de Software en la Universidad de Cartagena - UDEC. Me enfoco en desarrollo web, construcción de APIs y aplicaciones con buenas prácticas.</p>
+            <p>${displaySummary}</p>
           </section>
 
           <section class="section experience" id="experiencia">
@@ -222,7 +240,7 @@ app.get('/', (req, res) => {
 
           <section class="section contact-section" id="contacto">
             <h2>¡Escríbeme! 📬</h2>
-            <p style="color:var(--muted);line-height:1.6">Deja tu nombre, correo y mensaje. Al enviar, se abrirá tu correo para escribirme directamente.</p>
+            <p style="color:var(--muted);line-height:1.6">Deja tu nombre, correo y mensaje. Al enviar, el mensaje se enviará directamente desde el backend a tu correo.</p>
             <div class="item">
               <form id="contactForm" class="contact-form">
                 <input id="contactName" type="text" placeholder="Nombre" required class="contact-input" />
@@ -253,9 +271,9 @@ app.get('/', (req, res) => {
           <div class="aside-card">
             <h2>Contacto</h2>
             <div style="margin-top:10px;color:var(--muted)">
-              <div><strong>Email:</strong> <a href="mailto:galindocontrerasalexander@gmail.com">galindocontrerasalexander@gmail.com</a></div>
-              <div style="margin-top:6px"><strong>Teléfono:</strong> <span class="meta-block">3113602478</span></div>
-              <div style="margin-top:6px"><strong>Ubicación:</strong> <span class="meta-block">Sincelejito, Bolívar</span></div>
+              <div><strong>Email:</strong> <a href="mailto:${displayEmail}">${displayEmail}</a></div>
+              <div style="margin-top:6px"><strong>Teléfono:</strong> <span class="meta-block">${displayPhone}</span></div>
+              <div style="margin-top:6px"><strong>Ubicación:</strong> <span class="meta-block">${displayLocation}</span></div>
             </div>
           </div>
 
