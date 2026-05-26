@@ -20,6 +20,7 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/api/experiencias', experienciaRoutes);
 
 // Endpoint para servir datos del CV desde data/cv.json
